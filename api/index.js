@@ -11,6 +11,12 @@ const fs = require("fs");
 // connect with database
 connectWithDB();
 
+// Auto-seed if DB is empty (production)
+if (process.env.NODE_ENV === 'production') {
+  const seed = require('./config/seed');
+  seed().catch(console.log);
+}
+
 // Create uploads directory if not exists
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -50,9 +56,20 @@ app.use(
 app.use(express.json());
 
 // CORS
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.CLIENT_URL?.replace(/\/$/, ''),
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
   })
 );
