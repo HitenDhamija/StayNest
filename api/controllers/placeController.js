@@ -142,3 +142,51 @@ exports.searchPlaces = async (req, res) => {
     });
   }
 }
+
+// Check availability for given dates
+exports.checkAvailability = async (req, res) => {
+  try {
+    const { checkIn, checkOut } = req.query;
+    const Booking = require('../models/Booking');
+    
+    const bookedPlaceIds = await Booking.find({
+      bookingStatus: 'active',
+      $or: [
+        { checkIn: { $lte: new Date(checkOut) }, checkOut: { $gte: new Date(checkIn) } },
+      ],
+    }).distinct('place');
+    
+    const availablePlaces = await Place.find({ _id: { $nin: bookedPlaceIds } });
+    res.status(200).json({ places: availablePlaces });
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Delete a place
+exports.deletePlace = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const place = await Place.findById(id);
+
+    if (!place) {
+      return res.status(404).json({ message: 'Place not found' });
+    }
+
+    if (place.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to delete this place' });
+    }
+
+    const Booking = require('../models/Booking');
+    const activeBookings = await Booking.countDocuments({ place: id, bookingStatus: 'active' });
+    if (activeBookings > 0) {
+      return res.status(400).json({ message: 'Cannot delete place with active bookings' });
+    }
+
+    await Place.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Place deleted successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

@@ -12,14 +12,15 @@ const SearchBar = () => {
 
   const handleSearch = async (e) => {
     clearTimeout(searchTimeout);
-    setSearchText(e.target.value);
+    const value = e.target.value;
+    setSearchText(value);
 
-    if (searchText.trimStart() !== '') {
+    if (value.trimStart() !== '') {
       setLoading(true);
       setSearchTimeout(
         setTimeout(async () => {
           const { data } = await axiosInstance.get(
-            `/places/search/${searchText.trimStart()}`,
+            `/places/search/${value.trimStart()}`,
           );
           setPlaces(data);
           setLoading(false);
@@ -43,7 +44,21 @@ const SearchBar = () => {
         <div className="bg-blue flex cursor-pointer  items-center bg-primary text-white">
           <button
             className="flex rounded-r-full bg-primary py-2 px-4 md:p-2"
-            onClick={handleSearch}
+            onClick={() => {
+              clearTimeout(searchTimeout);
+              if (searchText.trimStart() !== '') {
+                setLoading(true);
+                setSearchTimeout(
+                  setTimeout(async () => {
+                    const { data } = await axiosInstance.get(
+                      `/places/search/${searchText.trimStart()}`,
+                    );
+                    setPlaces(data);
+                    setLoading(false);
+                  }, 500),
+                );
+              }
+            }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -2,6 +2,8 @@ const User = require('../models/User');
 const cookieToken = require('../utils/cookieToken');
 const bcrypt = require('bcryptjs')
 const cloudinary = require('cloudinary').v2;
+const path = require('path');
+const fs = require('fs');
 
 
 // Register/SignUp user
@@ -85,7 +87,7 @@ exports.googleLogin = async (req, res) => {
     const { name, email } = req.body;
 
     if (!name || !email) {
-      return res.status(400), json({
+      return res.status(400).json({
         message: 'Name and email are required'
       })
     }
@@ -114,12 +116,29 @@ exports.googleLogin = async (req, res) => {
 
 // Upload picture
 exports.uploadPicture = async (req, res) => {
-  const { path } = req.file
+  const { path: filePath, originalname } = req.file
   try {
-    let result = await cloudinary.uploader.upload(path, {
-      folder: 'Airbnb/Users',
-    });
-    res.status(200).json(result.secure_url)
+    const useCloudinary = process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_NAME !== "mock";
+
+    if (useCloudinary) {
+      let result = await cloudinary.uploader.upload(filePath, {
+        folder: 'Airbnb/Users',
+      });
+      res.status(200).json(result.secure_url)
+    } else {
+      const targetDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      const ext = path.extname(originalname) || '.jpg';
+      const newFilename = 'avatar_' + Date.now() + ext;
+      const destPath = path.join(targetDir, newFilename);
+      fs.renameSync(filePath, destPath);
+
+      const host = req.get('host');
+      const protocol = req.protocol;
+      res.status(200).json(`${protocol}://${host}/uploads/${newFilename}`);
+    }
   } catch (error) {
     res.status(500).json({
       error,
@@ -136,7 +155,7 @@ exports.updateUserDetails = async (req, res) => {
     const user = await User.findOne({ email })
 
     if (!user) {
-      return res.status(404), json({
+      return res.status(404).json({
         message: 'User not found'
       })
     }
@@ -164,8 +183,8 @@ exports.logout = async (req, res) => {
   res.cookie('token', null, {
     expires: new Date(Date.now()),
     httpOnly: true,
-    secure: true,   // Only send over HTTPS
-    sameSite: 'none' // Allow cross-origin requests
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
   res.status(200).json({
     success: true,

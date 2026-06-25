@@ -35,9 +35,9 @@ export const useProvideAuth = () => {
             });
             if (data.user && data.token) {
                 setUser(data.user)
-                // save user and token in local storage
                 setItemsInLocalStorage('user', data.user)
                 setItemsInLocalStorage('token', data.token)
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
             return { success: true, message: 'Registration successfull' }
         } catch (error) {
@@ -56,9 +56,9 @@ export const useProvideAuth = () => {
             });
             if (data.user && data.token) {
                 setUser(data.user)
-                // save user and token in local storage
                 setItemsInLocalStorage('user', data.user)
                 setItemsInLocalStorage('token', data.token)
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
             return { success: true, message: 'Login successfull' }
         } catch (error) {

@@ -1,103 +1,208 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-
-import AccountNav from '@/components/ui/AccountNav';
-import PlaceImg from '@/components/ui/PlaceImg';
-import BookingDates from '@/components/ui/BookingDates';
-import Spinner from '@/components/ui/Spinner';
+import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '@/utils/axios';
+import Spinner from '@/components/ui/Spinner';
+import { toast } from 'react-toastify';
 
 const BookingsPage = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [confirmCancel, setConfirmCancel] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const getBookings = async () => {
-      try {
-        const { data } = await axiosInstance.get('/bookings');
-        setBookings(data.booking);
-        setLoading(false);
-      } catch (error) {
-        console.log('Error: ', error);
-        setLoading(false);
-      }
-    };
-    getBookings();
+    fetchBookings();
   }, []);
+
+  const fetchBookings = async () => {
+    try {
+      const { data } = await axiosInstance.get('/bookings');
+      setBookings(data.booking);
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
+
+  const handleCancel = async (bookingId) => {
+    setCancellingId(bookingId);
+    try {
+      const { data } = await axiosInstance.put(`/bookings/${bookingId}/cancel`);
+      setBookings((prev) =>
+        prev.map((b) => (b._id === bookingId ? data.booking : b))
+      );
+      toast.success('Booking cancelled successfully');
+      setTimeout(() => navigate('/'), 1500);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel booking');
+    }
+    setCancellingId(null);
+    setConfirmCancel(null);
+  };
 
   if (loading) return <Spinner />;
 
-  return (
-    <div className="flex flex-col items-center">
-      <AccountNav />
-      <div>
-        {bookings?.length > 0 ? (
-          bookings.map((booking) => (
-            <Link
-              to={`/account/bookings/${booking._id}`}
-              className="mx-4 my-8 flex h-28 gap-4 overflow-hidden rounded-2xl bg-gray-200 md:h-40 lg:mx-0"
-              key={booking._id}
-            >
-              <div className="w-2/6 md:w-1/6">
-                {booking?.place?.photos[0] && (
-                  <PlaceImg
-                    place={booking?.place}
-                    className={'h-full w-full object-cover'}
-                  />
-                )}
-              </div>
-              <div className="grow py-3 pr-3">
-                <h2 className="md:text-2xl">{booking?.place?.title}</h2>
-                <div className="md:text-xl">
-                  <div className="flex gap-2 border-t "></div>
-                  <div className="md:text-xl">
-                    <BookingDates
-                      booking={booking}
-                      className="mb-2 mt-4 hidden items-center text-gray-600  md:flex"
-                    />
+  const upcomingBookings = bookings.filter(
+    (b) => new Date(b.checkOut) >= new Date() && b.bookingStatus !== 'cancelled'
+  );
+  const pastBookings = bookings.filter(
+    (b) => new Date(b.checkOut) < new Date() && b.bookingStatus !== 'cancelled'
+  );
+  const cancelledBookings = bookings.filter((b) => b.bookingStatus === 'cancelled');
 
-                    <div className="my-2 flex items-center gap-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-7 w-7"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-                        />
-                      </svg>
-                      <span className="text-xl md:text-2xl">
-                        Total price: ₹{booking.price}
-                      </span>
-                    </div>
-                  </div>
+  return (
+    <div className="pt-24 min-h-screen bg-[#fafafa]">
+      <div className="max-w-screen-lg mx-auto px-6 py-12">
+        <h1 className="text-2xl font-semibold mb-8">Your Bookings</h1>
+
+        {bookings.length === 0 ? (
+          <div className="text-center py-20 bg-white border border-border rounded-md">
+            <p className="text-neutral-500">No bookings yet.</p>
+            <Link
+              to="/"
+              className="mt-4 inline-block text-sm font-medium text-neutral-900 underline"
+            >
+              Browse stays
+            </Link>
+          </div>
+        ) : (
+          <>
+            {upcomingBookings.length > 0 && (
+              <div className="mb-10">
+                <h2 className="text-lg font-medium mb-4 text-neutral-700">
+                  Upcoming
+                </h2>
+                <div className="space-y-4">
+                  {upcomingBookings.map((booking) => (
+                    <BookingCard
+                      key={booking._id}
+                      booking={booking}
+                      onCancel={() => setConfirmCancel(booking._id)}
+                      isCancelling={cancellingId === booking._id}
+                    />
+                  ))}
                 </div>
               </div>
-            </Link>
-          ))
-        ) : (
-          <div className="">
-            <div className="flex flex-col justify-start">
-              <h1 className="my-6 text-3xl font-semibold">Trips</h1>
-              <hr className="border border-gray-300" />
-              <h3 className="pt-6 text-2xl font-semibold">
-                No trips booked... yet!
-              </h3>
-              <p>
-                Time to dust off you bags and start planning your next adventure
-              </p>
-              <Link to="/" className="my-4">
-                <div className="flex w-40 justify-center rounded-lg border border-black p-3 text-lg font-semibold hover:bg-gray-50">
-                  Start Searching
+            )}
+            {pastBookings.length > 0 && (
+              <div className="mb-10">
+                <h2 className="text-lg font-medium mb-4 text-neutral-700">
+                  Past
+                </h2>
+                <div className="space-y-4 opacity-75">
+                  {pastBookings.map((booking) => (
+                    <BookingCard key={booking._id} booking={booking} />
+                  ))}
                 </div>
-              </Link>
+              </div>
+            )}
+            {cancelledBookings.length > 0 && (
+              <div>
+                <h2 className="text-lg font-medium mb-4 text-neutral-500">
+                  Cancelled
+                </h2>
+                <div className="space-y-4 opacity-50">
+                  {cancelledBookings.map((booking) => (
+                    <BookingCard key={booking._id} booking={booking} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {confirmCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-2">Cancel Booking?</h3>
+            <p className="text-sm text-neutral-500 mb-6">
+              This action cannot be undone. A refund will be initiated to your
+              original payment method within 5-7 business days.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmCancel(null)}
+                className="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm font-medium hover:bg-neutral-50 transition"
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={() => handleCancel(confirmCancel)}
+                disabled={cancellingId === confirmCancel}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {cancellingId === confirmCancel ? 'Cancelling...' : 'Yes, Cancel'}
+              </button>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const BookingCard = ({ booking, onCancel, isCancelling }) => {
+  const { place, checkIn, checkOut, price, numOfGuests, paymentStatus, bookingStatus } = booking;
+  const isPaid = paymentStatus === 'paid' || paymentStatus === 'refunded';
+  const isCancelled = bookingStatus === 'cancelled';
+
+  return (
+    <div className={`bg-white border border-border rounded-lg p-4 flex gap-4 items-center shadow-sm ${isCancelled ? 'opacity-60' : ''}`}>
+      <div className="w-24 h-24 rounded-md overflow-hidden flex-shrink-0 bg-neutral-100">
+        {place?.photos?.[0] ? (
+          <img
+            src={place.photos[0]}
+            alt={place.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs">
+            No image
+          </div>
+        )}
+      </div>
+      <div className="flex-grow min-w-0">
+        <h3 className="font-semibold text-sm truncate">{place?.title}</h3>
+        <p className="text-xs text-neutral-500 mt-1">
+          {new Date(checkIn).toLocaleDateString('en-IN')} -{' '}
+          {new Date(checkOut).toLocaleDateString('en-IN')}
+        </p>
+        <p className="text-xs text-neutral-500">
+          {numOfGuests} {numOfGuests === 1 ? 'guest' : 'guests'}
+        </p>
+      </div>
+      <div className="text-right flex-shrink-0">
+        <p className="font-semibold text-sm">
+          &#8377;{price?.toLocaleString()}
+        </p>
+        {isCancelled ? (
+          <p className="text-xs mt-1 font-medium text-red-500">Cancelled</p>
+        ) : paymentStatus === 'refunded' ? (
+          <p className="text-xs mt-1 font-medium text-blue-600">Refunded</p>
+        ) : isPaid ? (
+          <p className="text-xs mt-1 font-medium text-green-600">Paid</p>
+        ) : (
+          <p className="text-xs mt-1 font-medium text-orange-500">
+            Payment pending
+          </p>
+        )}
+        {isPaid && !isCancelled && (
+          <button
+            onClick={onCancel}
+            className="mt-2 inline-block text-xs bg-white border border-red-300 text-red-600 px-3 py-1 rounded-full hover:bg-red-50 transition"
+          >
+            Cancel
+          </button>
+        )}
+        {!isPaid && !isCancelled && (
+          <Link
+            to={`/payment/${booking._id}`}
+            className="mt-2 inline-block text-xs bg-neutral-900 text-white px-3 py-1 rounded-full hover:bg-neutral-800 transition"
+          >
+            Pay now
+          </Link>
         )}
       </div>
     </div>

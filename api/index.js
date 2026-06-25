@@ -5,18 +5,31 @@ const connectWithDB = require("./config/db");
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary").v2;
+const path = require("path");
+const fs = require("fs");
 
 // connect with database
 connectWithDB();
 
+// Create uploads directory if not exists
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // cloudinary configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+if (process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_NAME !== "mock") {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 const app = express();
+
+// Serve uploads statically
+app.use("/uploads", express.static(uploadsDir));
 
 // For handling cookies
 app.use(cookieParser());
@@ -27,9 +40,9 @@ app.use(
     name: "session",
     maxAge: process.env.COOKIE_TIME * 24 * 60 * 60 * 1000,
     keys: [process.env.SESSION_SECRET],
-    secure: true, // Only send over HTTPS
-    sameSite: "none", // Allow cross-origin requests
-    httpOnly: true, // Makes the cookie accessible only on the server-side
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    httpOnly: true,
   })
 );
 

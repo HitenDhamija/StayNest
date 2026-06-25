@@ -36,24 +36,25 @@ export const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 z-10 flex w-screen justify-center bg-white py-4 ${
-        hasShadow ? 'shadow-md' : ''
+      className={`fixed top-0 z-10 flex h-16 w-full items-center justify-center bg-white border-b border-border transition-shadow ${
+        hasShadow ? 'shadow-sm' : ''
       }`}
     >
       <div
-        className={`flex ${
+        className={`flex items-center ${
           showSearchBar ? 'justify-around' : 'justify-between px-10'
         } w-screen max-w-screen-xl`}
       >
-        <a href="/" className="flex items-center gap-1">
-          <img
-            className="h-8 w-8 md:h-10 md:w-10"
-            src="https://cdn-icons-png.flaticon.com/512/2111/2111320.png"
-            alt=""
-          />
-
-          <span className="hidden text-2xl font-bold text-red-500 md:block">
-            airbnb
+        <a href="/" className="flex items-center gap-2 text-black hover:opacity-80 transition-opacity">
+          <svg
+            viewBox="0 0 75 65"
+            fill="currentColor"
+            className="h-5 w-5 md:h-6 md:w-6 text-black"
+          >
+            <polygon points="37.5,0 75,65 0,65" />
+          </svg>
+          <span className="hidden text-lg font-semibold tracking-tight md:block">
+            StayNest
           </span>
         </a>
 
@@ -61,7 +62,7 @@ export const Header = () => {
 
         <Link
           to={user ? '/account' : '/login'}
-          className="w-50 flex h-full items-center gap-2 rounded-full border-gray-300 py-1 px-2 md:border"
+          className="flex items-center gap-2 rounded-sm border border-border bg-white py-1 px-3 hover:bg-neutral-50 transition"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +70,7 @@ export const Header = () => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="hidden h-6 w-6 md:block"
+            className="hidden h-5 w-5 md:block text-neutral-600"
           >
             <path
               strokeLinecap="round"
@@ -78,15 +79,15 @@ export const Header = () => {
             />
           </svg>
 
-          <div className="z-10 h-[35px] w-[35px] overflow-hidden rounded-full">
+          <div className="z-10 h-7 w-7 overflow-hidden rounded-full border border-border">
             {user ? (
               <Avatar>
                 {user?.picture ? (
-                  <AvatarImage src={user.picture} className="h-full w-full" />
+                  <AvatarImage src={user.picture} className="h-full w-full object-cover" />
                 ) : (
                   <AvatarImage
                     src="https://res.cloudinary.com/rahul4019/image/upload/v1695133265/pngwing.com_zi4cre.png"
-                    className="h-full w-full"
+                    className="h-full w-full object-cover"
                   />
                 )}
               </Avatar>
@@ -101,7 +102,7 @@ export const Header = () => {
                 enableBackground="new 796 796 200 200"
                 xmlSpace="preserve"
                 stroke="#858080"
-                className="h-8 w-8"
+                className="h-full w-full object-cover p-1"
               >
                 <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
                 <g
@@ -115,9 +116,9 @@ export const Header = () => {
               </svg>
             )}
           </div>
+          {user && <span className="text-sm font-medium text-neutral-800">{user.name}</span>}
         </Link>
       </div>
-      <br className="border border-gray-600" />
     </header>
   );
 };

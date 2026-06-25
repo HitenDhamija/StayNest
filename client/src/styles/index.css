@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 0 0% 98%; /* Vercel canvas-soft: #fafafa */
+    --foreground: 0 0% 9%;    /* Vercel ink: #171717 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;        /* Vercel canvas: #ffffff */
+    --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 0 0% 9%;
 
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
@@ -19,7 +19,7 @@
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
 
-    --muted: 0 0% 96.1%;
+    --muted: 0 0% 45.1%;
     --muted-foreground: 0 0% 45.1%;
 
     --accent: 0 0% 96.1%;
@@ -28,11 +28,11 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 0 0% 92%;       /* Vercel hairline: #ebebeb */
+    --input: 0 0% 92%;
+    --ring: 0 0% 9%;
 
-    --radius: 0.75rem;
+    --radius: 6px;            /* Vercel base UI radius */
   }
 }
 
@@ -42,8 +42,21 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased font-sans;
   }
+}
+
+/* Vercel Custom Shadow Utilities */
+.shadow-vercel-sm {
+  box-shadow: 0px 1px 1px #00000005, 0px 2px 2px #0000000a, inset 0 0 0 1px #0000000a;
+}
+
+.shadow-vercel-md {
+  box-shadow: 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a, inset 0 0 0 1px #0000000a;
+}
+
+.shadow-vercel-lg {
+  box-shadow: 0px 2px 2px #0000000a, 0px 8px 16px -4px #0000000a, inset 0 0 0 1px #0000000a;
 }
 
 input[type='text'],
@@ -52,7 +65,7 @@ input[type='email'],
 input[type='number'],
 input[type='tel'],
 textarea {
-  @apply my-2 w-full rounded-[10px] border py-2 px-3;
+  @apply my-2 w-full rounded-sm border border-border bg-white py-2 px-3 text-sm focus:border-neutral-500 focus:outline-none transition;
 }
 
 textarea {
@@ -60,17 +73,22 @@ textarea {
 }
 
 button {
-  @apply bg-gray-300;
+  @apply rounded-sm py-2 px-4 text-sm font-medium transition;
 }
 
 button.primary {
-  @apply w-full rounded-[10px] bg-primary p-2 text-white;
+  @apply w-full rounded-full bg-primary py-2 px-6 text-white hover:bg-neutral-800 focus:outline-none transition;
 }
 
 button.social {
-  @apply w-full rounded-[10px] border-[1px] border-black bg-white p-2 font-semibold text-black hover:bg-gray-50;
+  @apply w-full rounded-full border border-border bg-white py-2 px-6 font-medium text-black hover:bg-neutral-50 focus:outline-none transition;
 }
 
 .card {
-  @apply h-[410px] w-[327px] sm:h-[500px] sm:w-[435px] md:h-[400px] md:w-[350px] lg:h-[400px] lg:w-[330px] xl:h-[350px] xl:w-[300px];
+  @apply bg-card rounded-md border border-border p-4 transition-shadow duration-200;
+  box-shadow: 0px 1px 1px #00000005, 0px 2px 2px #0000000a, inset 0 0 0 1px #0000000a;
+  height: 380px;
+}
+.card:hover {
+  box-shadow: 0px 2px 2px #0000000a, 0px 8px 8px -8px #0000000a, inset 0 0 0 1px #0000000a;
 }

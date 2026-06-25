@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { GoogleLogin } from '@react-oauth/google';
 import { Navigate } from 'react-router-dom';
 
 import { useAuth } from '../../hooks';
@@ -32,72 +31,66 @@ const RegisterPage = () => {
     }
   };
 
-  const handleGoogleLogin = async (credential) => {
-    const response = await auth.googleLogin(credential);
-    if (response.success) {
-      toast.success(response.message);
-      setRedirect(true);
-    } else {
-      toast.error(response.message);
-    }
-  };
-
   if (redirect) {
     return <Navigate to="/" />;
   }
 
   return (
-    <div className="mt-4 flex grow items-center justify-around p-4 md:p-0">
-      <div className="mb-40">
-        <h1 className="mb-4 text-center text-4xl">Register</h1>
-        <form className="mx-auto max-w-md" onSubmit={handleFormSubmit}>
-          <input
-            name="name"
-            type="text"
-            placeholder="John Doe"
-            value={formData.name}
-            onChange={handleFormData}
-          />
-          <input
-            name="email"
-            type="email"
-            placeholder="your@email.com"
-            value={formData.email}
-            onChange={handleFormData}
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="password"
-            value={formData.password}
-            onChange={handleFormData}
-          />
-          <button className="primary my-2">Register</button>
+    <div className="pt-24 flex min-h-screen items-center justify-center bg-[#fafafa] px-4">
+      <div className="w-full max-w-md bg-white border border-border rounded-lg shadow-vercel-lg p-8 mb-24">
+        <h1 className="text-2xl font-semibold tracking-[-1.0px] text-neutral-900 font-sans text-center mb-6">
+          Create an Account
+        </h1>
+        
+        <form className="space-y-4" onSubmit={handleFormSubmit}>
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1">
+              Your Name
+            </label>
+            <input
+              name="name"
+              type="text"
+              placeholder="John Doe"
+              value={formData.name}
+              onChange={handleFormData}
+              className="mt-0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1">
+              Email Address
+            </label>
+            <input
+              name="email"
+              type="email"
+              placeholder="your@email.com"
+              value={formData.email}
+              onChange={handleFormData}
+              className="mt-0"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1">
+              Password
+            </label>
+            <input
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleFormData}
+              className="mt-0"
+            />
+          </div>
+
+          <button className="primary mt-6">Register</button>
         </form>
 
-        <div className="mb-4 flex w-full items-center gap-4">
-          <div className="h-0 w-1/2 border-[1px]"></div>
-          <p className="small -mt-1">or</p>
-          <div className="h-0 w-1/2 border-[1px]"></div>
-        </div>
-
-        {/* Google login button */}
-        <div className="flex h-[50px] justify-center">
-          <GoogleLogin
-            onSuccess={(credentialResponse) => {
-              handleGoogleLogin(credentialResponse.credential);
-            }}
-            onError={() => {
-              console.log('Login Failed');
-            }}
-            text="continue_with"
-            width="350"
-          />
-        </div>
-
-        <div className="py-2 text-center text-gray-500">
-          Already a member?
-          <Link className="text-black underline" to={'/login'}>
+        <div className="text-center text-xs text-neutral-500 font-sans border-t border-border pt-4 mt-6">
+          Already a member?{' '}
+          <Link className="text-neutral-900 font-medium hover:underline ml-1" to={'/login'}>
             Login
           </Link>
         </div>

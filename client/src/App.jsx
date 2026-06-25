@@ -13,10 +13,11 @@ import BookingsPage from './pages/BookingsPage';
 import PlacesFormPage from './pages/PlacesFormPage';
 import PlacePage from './pages/PlacePage';
 import SingleBookedPlace from './pages/SingleBookedPlace';
+import PaymentPage from './pages/PaymentPage';
+import WishlistPage from './pages/WishlistPage';
 import axiosInstance from './utils/axios';
 import { UserProvider } from './providers/UserProvider';
 import { PlaceProvider } from './providers/PlaceProvider';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -29,31 +30,31 @@ function App() {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <UserProvider>
-        <PlaceProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<IndexPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/account" element={<ProfilePage />} />
-              <Route path="/account/places" element={<PlacesPage />} />
-              <Route path="/account/places/new" element={<PlacesFormPage />} />
-              <Route path="/account/places/:id" element={<PlacesFormPage />} />
-              <Route path="/place/:id" element={<PlacePage />} />
-              <Route path="/account/bookings" element={<BookingsPage />} />
-              <Route
-                path="/account/bookings/:id"
-                element={<SingleBookedPlace />}
-              />
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-          <ToastContainer autoClose={2000} transition={Slide} />
-        </PlaceProvider>
-      </UserProvider>
-    </GoogleOAuthProvider>
+    <UserProvider>
+      <PlaceProvider>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<IndexPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/account" element={<ProfilePage />} />
+            <Route path="/account/places" element={<PlacesPage />} />
+            <Route path="/account/places/new" element={<PlacesFormPage />} />
+            <Route path="/account/places/:id" element={<PlacesFormPage />} />
+            <Route path="/place/:id" element={<PlacePage />} />
+            <Route path="/account/bookings" element={<BookingsPage />} />
+            <Route
+              path="/account/bookings/:id"
+              element={<SingleBookedPlace />}
+            />
+            <Route path="/account/wishlist" element={<WishlistPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+          <Route path="/payment/:bookingId" element={<PaymentPage />} />
+        </Routes>
+        <ToastContainer autoClose={2000} transition={Slide} />
+      </PlaceProvider>
+    </UserProvider>
   );
 }
 

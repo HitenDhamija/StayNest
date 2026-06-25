@@ -24,6 +24,10 @@ const PlacesPage = () => {
     getPlaces();
   }, []);
 
+  const handleDelete = (placeId) => {
+    setPlaces((prev) => prev.filter((p) => p._id !== placeId));
+  };
+
   if (loading) {
     return <Spinner />;
   }
@@ -55,7 +59,7 @@ const PlacesPage = () => {
       </div>
       <div className="mx-4 mt-4">
         {places.length > 0 &&
-          places.map((place) => <InfoCard place={place} key={place._id} />)}
+          places.map((place) => <InfoCard place={place} key={place._id} onDelete={handleDelete} />)}
       </div>
     </div>
   );
