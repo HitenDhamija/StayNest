@@ -1,19 +1,14 @@
 {
-  "name": "airbnb-api",
+  "name": "staynest-api",
   "version": "1.0.0",
-  "description": "API for airbnb clone app",
-  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node dev.js",
     "seed": "node -e \"require('./config/seed')()\""
   },
-  "keywords": [
-    "api",
-    "backend"
-  ],
-  "author": "rahul4019",
-  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.35.0",
